@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Add Expense</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="/assets/css/jquery.mobile.structure-1.4.5.css" />
+ <link rel="stylesheet" href="/assets/css/jquery.mobile-1.4.5.css" />
+ <script src="/assets/js/jquery.min.js"></script>
+ <script src="/assets/js/jqm-settings.js"></script>
+ <script src="/assets/js/jquery.mobile-1.4.5.min.js"></script>
+ 
+ <link rel="stylesheet" href="/assets/css/jtsage-datebox.css" />
+ <link rel="stylesheet" href="/assets/css/jtsage-datebox.min.css" />
+ <script type="text/javascript" src="/assets/js/jtsage-datebox.js"></script>
+ <script type="text/javascript" src="/assets/js/jtsage-datebox.min.js"></script>
+ 
+ <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+ 
+ <script>
+	 var lat = 0;
+	 var lng = 0;
+	 var locClicked = false;
+	 
+	 //A button click will call this function
+	 function getLocation() {
+		 $("#label-loc")[0].innerHTML = "waiting for location data!";
+	     navigator.geolocation.getCurrentPosition(onSuccess, onError, { enableHighAccuracy: true });
+	 }
+	
+	 // onSuccess Geolocation
+	 //
+	 function onSuccess(position) {
+	     //Lat long will be fetched and stored in session variables
+	     //These variables will be used while storing data in local database 
+	     lat = position.coords.latitude;
+	     lng = position.coords.longitude;
+	     document.getElementById('long').value = lng;
+	     document.getElementById('lat').value = lat;
+	     $("#label-loc")[0].innerHTML = "Long: " + lng + ", Lat: " + lat;
+	     locClicked = true;
+	 }
+	 // onError Callback receives a PositionError object
+	 //
+	 function onError(error) {
+	     $("#label-loc")[0].innerHTML = "Error getting location!"
+	     locClicked = true;
+	     lng = 0;
+	     lat = 0;
+	 }
+	 
+	 function check() {
+		 var useLoc = $("#checkbox-loc")[0].checked;
+		 if(useLoc == false)
+			 return true;
+		 if(locClicked == false) {
+			 alert('get location first');
+			 return false;
+		 }
+		 locClicked = false;
+		 lng = 0;
+		 lat = 0;
+		 return true;
+	 }
+ </script>
+</head>
+<body>
+<div data-role="main" class="ui-content">
+<form method="get" action="submitexpense" onsubmit="return check();" >
+
+<!--
+<label for="slider-price">Price:</label>
+<input type="range" data-type="range" name="price" id="slider-price" min="0" max="5000" step=".2" value="20">
+-->
+<div data-role="fieldcontain">
+    <label for="price">Price:</label>
+    <input type="number" name="price" id="price" value="" step="0.01" data-mini="true" />
+</div>	
+
+<label for="select-choice-category" class="select">Category:</label>
+<select name="category" id="select-choice-category" data-mini="true" >
+{% for category in categories %}
+  <option value={{category}}>{{category}}</option>
+{% endfor %}
+</select>
+
+<label for="select-choice-type" class="select">Type:</label>
+<select name="type" id="select-choice-type" data-mini="true" >
+{% for type in types %}
+  <option value={{type}}>{{type}}</option>
+{% endfor %}
+</select>
+
+<label for="select-choice-tx" class="select">Tx Type:</label>
+<select name="txType" id="select-choice-tx" data-mini="true" >
+  <option value="offline">offline</option>
+  <option value="online">online</option>
+</select>
+
+<label for="date">Date</label>
+<input name="date" class="form-control" id="date" type="text" data-role="datebox" data-mini="true" data-options='{"mode":"calbox"}' />
+
+<label for="basic">Comment:</label>
+<input type="text" name="comment" id="comment" data-mini="true" value=""  />
+
+<input type="hidden" id="long" name="long" value="0" />
+<input type="hidden" id="lat" name="lat" value="0" />
+
+<div data-role="fieldcontain">
+	<input type="checkbox" id="checkbox-loc" class="custom" checked="true" data-mini="true" />
+	<label for="checkbox-loc">Use location</label>
+</div>
+
+<button type="button" class="ui-btn" data-mini="true" onclick="getLocation();">Get Loc</button>
+<label id="label-loc" data-mini="true" >No location data</label>
+
+<input type="submit" class="ui-btn" value="Add">
+
+<a href="/home/" class="ui-btn" data-mini="true" >Home</a>
+</form>
+</div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Grocery Expense</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="/assets/css/jquery.mobile.structure-1.4.5.css" />
+ <link rel="stylesheet" href="/assets/css/jquery.mobile-1.4.5.css" />
+ <script src="/assets/js/jquery.min.js"></script>
+ <script src="/assets/js/jqm-settings.js"></script>
+ <script src="/assets/js/jquery.mobile-1.4.5.min.js"></script>
+ 
+ <link rel="stylesheet" href="/assets/css/jtsage-datebox.css" />
+ <link rel="stylesheet" href="/assets/css/jtsage-datebox.min.css" />
+ <script type="text/javascript" src="/assets/js/jtsage-datebox.js"></script>
+ <script type="text/javascript" src="/assets/js/jtsage-datebox.min.js"></script>
+ 
+ <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+ 
+</head>
+<body>
+
+<div data-role="main" class="ui-content" id="grocerypage">
+<form method="get" action="submitgrocery" onsubmit="return check();" >
+
+<label for="item">Item:</label>
+<p>
+ <input type="text" id="item" name="item" placeholder="ex: milk, yogurt etc.">
+ <ul id="suggestionsitem" data-role="listview" data-mini="true" data-inset="true"></ul>
+</p>
+
+<label for="place">Place:</label>
+<p>
+ <input type="text" id="place" name="place" placeholder="ex: costco, target, sprouts etc">
+ <ul id="suggestionsplace" data-role="listview" data-mini="true" data-inset="true"></ul>
+</p>
+
+<div data-role="fieldcontain">
+    <label for="price">Price:</label>
+    <input type="number" name="price" id="price" value="" step="0.01" data-mini="true" />
+</div>	
+
+<div data-role="fieldcontain">
+    <label for="quantity">Quantity:</label>
+    <input type="number" name="quantity" id="quantity" value="" step="0.01" data-mini="true" />
+</div>	
+
+<label for="select-choice-unit" class="select">Unit:</label>
+<select name="unit" id="select-choice-unit" data-mini="true" >
+{% for unit in unitTypes %}
+  <option value={{unit}}>{{unit}}</option>
+{% endfor %}
+</select>
+
+<label for="date">Date</label>
+<input name="date" class="form-control" id="date" type="text" data-role="datebox" data-mini="true" data-options='{"mode":"calbox"}' />
+
+<input type="submit" class="ui-btn" value="Add">
+
+<a href="/home/" class="ui-btn" data-mini="true" >Home</a>
+</form>
+</div>
+
+<script>
+	var suggestionsItem = [];
+	{% for item in items %}
+		suggestionsItem.push('{{ item }}');
+	{% endfor %}
+	
+	var suggestionsPlace = [];
+	{% for place in places %}
+		suggestionsPlace.push('{{ place }}');
+	{% endfor %}
+
+	function getSuggestions(type, strIn) {
+		var ret = [];
+		var arr = suggestionsItem;
+		if(type == 'place') {
+			arr = suggestionsPlace;
+		}
+		for(var i = 0; i < arr.length; i++) {
+			if(arr[i].includes(strIn.toLowerCase())) {
+				ret.push(arr[i]);
+			}
+		}
+		return ret;
+	}
+	
+	function textInputEvent(e) {
+		var type = e.target.id;
+		var sugList = $("#suggestions" + type);
+		var text = $(this).val();
+		suggests = getSuggestions(type, text);
+		
+		var str = "";
+        for(var i=0, len=suggests.length; i<len; i++) {
+            str += "<li>"+suggests[i]+"</li>";
+        }
+        sugList.html(str);
+        sugList.listview("refresh");
+	}
+	
+	function listElementClickEvent(e) {
+		var type = e.target.parentElement.id;
+		var sugList = $("#" + type);
+		$("#" + type.replace("suggestions", "")).val(e.target.textContent);
+		sugList.html("");
+		sugList.listview("refresh");
+	}
+	
+	$("#item").on("input", textInputEvent);
+	$("#place").on("input", textInputEvent);
+	$("#suggestionsitem").on("click", listElementClickEvent);
+	$("#suggestionsplace").on("click", listElementClickEvent);
+	
+	function check() {
+		if($("#item").val() && $("#place").val() && $("#quantity").val() && $("#price").val()) {
+			return true;
+		}
+		alert("Please enter all the fields");
+		return false;
+	}
+	/*
+	$("#item").on("input", function(e) {
+		var sugList = $("#suggestions");
+		var text = $(this).val();
+		suggests = getSuggestions(text);
+		
+		var str = "";
+        for(var i=0, len=suggests.length; i<len; i++) {
+            str += "<li>"+suggests[i]+"</li>";
+        }
+        sugList.html(str);
+        sugList.listview("refresh");
+	});
+	
+	$("#suggestions").on("click", function(e) {
+		var sugList = $("#suggestions");
+		$("#item").val(e.target.textContent);
+		sugList.html("");
+		sugList.listview("refresh");
+	})
+	*/
+</script>
+
+
+</body>
+</html>

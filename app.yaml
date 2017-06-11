@@ -1,0 +1,25 @@
+application: expensemgmt-145716
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+# this is for interactive shell in production environment
+# use http://expensemgmt-145716.appspot.com/admin/interactive to play
+- url: /admin/.*
+  script: google.appengine.ext.admin.application
+  login: admin
+- url: /assets
+  static_dir: assets
+- url: /.*
+  script: main.application
+  secure: always
+
+  
+libraries:
+- name: django
+  version: "1.9"
+  
+env_variables:
+  DJANGO_SETTINGS_MODULE: 'ExpenseMgmt.settings'

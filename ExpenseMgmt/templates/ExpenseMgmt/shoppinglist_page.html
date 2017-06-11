@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Shopping List</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="/assets/css/jquery.mobile.structure-1.4.5.css" />
+ <link rel="stylesheet" href="/assets/css/jquery.mobile-1.4.5.css" />
+ <script src="/assets/js/jquery.min.js"></script>
+ <script src="/assets/js/jqm-settings.js"></script>
+ <script src="/assets/js/jquery.mobile-1.4.5.min.js"></script>
+ 
+ <link rel="stylesheet" href="/assets/css/jtsage-datebox.css" />
+ <link rel="stylesheet" href="/assets/css/jtsage-datebox.min.css" />
+ <script type="text/javascript" src="/assets/js/jtsage-datebox.js"></script>
+ <script type="text/javascript" src="/assets/js/jtsage-datebox.min.js"></script>
+ 
+ <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+</head>
+<body>
+<div data-role="main" class="ui-content">
+<ul data-role="listview" data-inset="false" id="shoppingList">
+	<!-- 
+    <li id='1234'>
+    	<div class="ui-grid-a">
+    		<div class="ui-block-a" data-role="collapsible">
+	    		<h2>Carrots 1 lb</h2>
+	    		<ul data-role="listview" data-inset="true" data-theme="a">
+					<li><a href="index.html">Acura</a></li>
+				</ul>
+	    	</div>
+	    	<div class="ui-block-b">
+	    		<a href="#" data-role="button" data-icon="delete" data-iconpos="notext">Delete</a>
+	    	</div>
+	    </div>
+	</li>
+	-->
+    {% for sitem in shopItems %}
+    	<li id={{sitem.id}} style="padding:0px;margin:0px">
+    		<div class="ui-grid-a">
+	    		<div class="ui-block-a" data-role="collapsible" style="width:80%">
+		    		<h4>{{sitem.itemName}} {{sitem.quantity}} {{sitem.unit}}</h4>
+		    		<ul data-role="listview" data-inset="true" data-theme="a">
+		    			{% for gplace,val in sitem.places.items %}
+							<li><a href="#">{{gplace}} {{val.price}}/{{val.unit}}</a></li>
+						{% endfor %}
+					</ul>
+		    	</div>
+	    		<div class="ui-block-b" style="width:20%">
+	    			<a href="#" data-role="button" data-icon="delete" data-iconpos="notext">Delete</a>
+	    		</div>
+	    	</div>
+	    </li>
+	{% endfor %}
+</ul>
+
+<label for="item">Item:</label>
+<p>
+ <input type="text" id="item" name="item" placeholder="ex: milk, yogurt etc." data-clear-btn="true">
+ <ul id="suggestionsitem" data-role="listview" data-mini="true" data-inset="true"></ul>
+</p>
+
+<div class="ui-grid-a">
+<div class="ui-block-a" style="width:40%">
+    <input type="number" name="quantity" id="quantity" value="" step="0.01" data-mini="true"  placeholder="Quantity" data-clear-btn="true"/>
+</div>	
+<div class="ui-block-b" style="width:30%">
+<select name="unit" id="unit" data-mini="true" >
+{% for unit in unitTypes %}
+  <option value={{unit}}>{{unit}}</option>
+{% endfor %}
+</select>
+</div>
+<div class="ui-block-c" style="width:30%">
+<a href="#" class="ui-btn" data-mini="true" id="addItemButton">Add</a>
+</div>
+</div>
+
+<a href="/home/" class="ui-btn" data-mini="true" >Home</a>
+</div>
+
+<script>
+	var suggestionsItem = [];
+	{% for item in items %}
+		suggestionsItem.push('{{ item }}');
+	{% endfor %}
+	
+	function getSuggestions(type, strIn) {
+		var ret = [];
+		var arr = suggestionsItem;
+		if(type == 'place') {
+			arr = suggestionsPlace;
+		}
+		for(var i = 0; i < arr.length; i++) {
+			if(arr[i].includes(strIn.toLowerCase())) {
+				ret.push(arr[i]);
+			}
+		}
+		return ret;
+	}
+	
+	function textInputEvent(e) {
+		var type = e.target.id;
+		var sugList = $("#suggestions" + type);
+		var text = $(this).val();
+		suggests = getSuggestions(type, text);
+		
+		var str = "";
+        for(var i=0, len=suggests.length; i<len; i++) {
+            str += "<li>"+suggests[i]+"</li>";
+        }
+        sugList.html(str);
+        sugList.listview("refresh");
+	}
+	
+	function listElementClickEvent(e) {
+		var type = e.target.parentElement.id;
+		var sugList = $("#" + type);
+		$("#" + type.replace("suggestions", "")).val(e.target.textContent);
+		sugList.html("");
+		sugList.listview("refresh");
+	}
+	
+	$("#item").on("input", textInputEvent);
+	$("#suggestionsitem").on("click", listElementClickEvent);
+	
+	function check() {
+		if($("#item").val() && $("#quantity").val() && $("#price").val()) {
+			return true;
+		}
+		alert("Please enter all the fields");
+		return false;
+	}
+	
+	
+	
+	$('#shoppingList').delegate('li', 'click', function () {
+        //alert($(this).attr('id'));
+        var id = $(this).attr('id');
+        $.ajax({
+            type: "POST",
+            url: "/ajax/delShoppingItem/",
+            data: ({itemId: id}),
+            cache: false,
+            dataType: "text",
+            success: function(result){}
+          });
+        $('#' + id).remove();
+        $('#shoppingList').listview('refresh');
+    });
+	
+	function addShoppingItem(itemInfo) {
+		var liHdr = '<li id="' + itemInfo.id + '" style="padding:0px;margin:0px>';
+		var shoppingLiInnerHeader = '<div class="ui-grid-a"><div class="ui-block-a" data-role="collapsible" style="width:80%">';
+		var h2 = '<h2>' + itemInfo.item + ' ' + itemInfo.quantity + ' ' + itemInfo.unit + '</h2>';
+		var innerList = '<ul data-role="listview" data-inset="true" data-theme="a">';
+		for( var i in itemInfo.places ) {
+			var str = itemInfo.places[i].place + ' ' + itemInfo.places[i].price + '/' + itemInfo.places[i].unit;
+			innerList += ('<li>' + str + '</li>');
+		}
+		innerList += '</ul>';
+		var deleteBloc = '<div class="ui-block-b" style="width:20%"><a href="#" data-role="button" data-icon="delete" data-iconpos="notext">Delete</a></div>';
+		$('#shoppingList').append(liHdr + shoppingLiInnerHeader + h2 + innerList + '</div>' + deleteBloc + '</div></div></li>' ).trigger('create');
+		$('#shoppingList').listview('refresh');
+		
+		//clear input items
+		$('#item').val('');
+		$('#quantity').val('');
+	}
+	var ajaxData;
+	$(function() {
+		 
+	     $("#addItemButton").click(function() {
+	    	var item = $.trim($("#item").val());
+	    	var quant = $("#quantity").val();
+	    	var unit = $.trim($("#unit").val());
+            $.ajax({
+              type: "POST",
+              url: "/ajax/addShoppingItem/",
+              data: ({item: item, quantity: quant, unit: unit}),
+              cache: false,
+              dataType: "text",
+              complete: function() {$('#shoppingList').listview('refresh');},
+              success: onSuccess
+            });
+        
+	     });
+	
+	     function onSuccess(data)
+	     {
+	         ajaxData = data;
+	         data = JSON.parse(data);
+	         addShoppingItem(data.result);
+	     }
+	
+	 });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Statistics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="/assets/css/jquery.mobile.structure-1.4.5.css" />
+ <link rel="stylesheet" href="/assets/css/jquery.mobile-1.4.5.css" />
+ <script src="/assets/js/jquery.min.js"></script>
+ <script src="/assets/js/jqm-settings.js"></script>
+ <script src="/assets/js/jquery.mobile-1.4.5.min.js"></script>
+ <script src="/assets/js/jqm-mmp.js"></script>
+ 
+ <style>
+h4 { margin:4px; }
+p { margin:2px; font-size: 12px }
+tr {
+    border-bottom: 1px solid lightgray;
+}
+</style>
+ 
+ <script>
+	$(document).ready(function() {
+		$('#mmp').mmp();
+
+		$('#showBtn').click(function () {
+			document.getElementById('dates').value = $('#mmp').mmp('value').join();
+		});
+
+	});
+ </script>
+ 
+ <!-- for showing border on each row -->
+</head>
+
+<body>
+
+<div data-role="main" class="ui-content">
+ <a href="/home/" class="ui-btn">Home</a>
+ <div id="mmp"></div>
+ <form method="get" action="/stats" >
+ 
+ <input type="hidden" id="dates" name="dates" value="" />
+ <input type="submit" class="ui-btn" id="showBtn" value="Show">
+ </form>
+
+ <table data-role="table" class="ui-responsive">
+ 	<thead>
+        <tr>
+          <th></th>
+        </tr>
+    </thead>
+        <tbody>
+        	<tr>
+        		<td> 
+        			<h4>Total</h4>
+        			<p>Spent: {{Stats.overall.overallStats.totalSpent}}</p>
+        			<p>Earned: {{Stats.overall.overallStats.totalEarned}}</p>
+        		</td>
+        	</tr>
+        {% for type, val in Stats.overall.perTypeStats.items %}
+        	<tr>
+        		<td> 
+        			<h4>{{type}}</h4>
+        			<p>Spent: {{val.totalSpent}}</p>
+        			<p>Earned: {{val.totalEarned}}</p>
+        		</td>
+        	</tr>
+        {% endfor %}
+     
+		</tbody>
+		</table>
+
+ </div>
+</body>
+</html>

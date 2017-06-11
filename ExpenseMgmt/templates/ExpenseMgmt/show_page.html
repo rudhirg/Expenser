@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Expenses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="/assets/css/jquery.mobile.structure-1.4.5.css" />
+ <link rel="stylesheet" href="/assets/css/jquery.mobile-1.4.5.css" />
+ <script src="/assets/js/jquery.min.js"></script>
+ <script src="/assets/js/jqm-settings.js"></script>
+ <script src="/assets/js/jquery.mobile-1.4.5.min.js"></script>
+ <!-- for showing border on each row -->
+ <style>
+h4 { margin:4px; }
+p { margin:2px; font-size: 12px }
+tr {
+    border-bottom: 1px solid lightgray;
+}
+</style>
+</head>
+<body>
+<div data-role="main" class="ui-content">
+ <a href="/home/" class="ui-btn">Home</a>
+ <div data-role="header">
+    <h1>Expenses</h1>
+ </div>
+ <!--
+ <table data-role="table" class="ui-responsive">
+ 	<thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Price</th>
+        </tr>
+     </thead>
+        <tbody>
+        {% for expense in expenses %}
+        	<tr>
+        		<td> {{expense.date}}</td>
+        		<td> {{expense.category}}</td>
+        		<td> {{expense.type}}</td>
+        		<td> {{expense.price}}</td>
+        	</tr>
+        {% endfor %}
+     
+		</tbody>
+		</table>
+	-->	
+	<table data-role="table" data-filter="true" class="ui-responsive">
+ 	<thead>
+        <tr>
+          <th></th>
+        </tr>
+    </thead>
+        <tbody>
+        {% for expense in expenses %}
+        	<tr>
+        		<td> 
+        			<h4>{{expense.type}}</h4>
+        			<p>Paid {{expense.price}} in {{expense.category}} category on {{expense.date}}</p>
+        			<p style="font-style:italic; color: gray">"{{expense.comment}}"</p>
+        		</td>
+        	</tr>
+        {% endfor %}
+     
+		</tbody>
+		</table>
+		</div>
+</body>
+</html>
